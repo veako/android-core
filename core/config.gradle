@@ -1,0 +1,53 @@
+import org.codehaus.groovy.runtime.MethodClosure
+
+/**
+ * 决定需要开启哪些库的使用，有些库是有关联的，比如 bindingCollection 引用了 recyclerView。
+ * 因此即使禁用掉 recyclerView，开启 bindingCollection，也会导入 recyclerView
+ *
+ * 禁用掉的库，就不能使用该库的内容，正常来说在 release 打包的时候会从包中移除*/
+ext {
+    sdk = [compileSdk: 32,
+           minSdk    : 28,
+           targetSdk : 28
+    ]
+
+    includeLib = [
+            // 内存泄露
+            leakCanary      : true,
+            // 应用前后台监听
+            lifecycleProcess: true,
+
+            recyclerView    : true,
+
+            room            : true,
+
+            retrofit2       : true,
+
+            glide           : true,
+
+            // 权限申请
+            livePermissions : true,
+
+            // 内嵌加载中
+            loadSir         : true,
+
+            rxJava3         : true]
+}
+
+static def curDate() {
+    return new Date().format("yyyy-MM-dd")
+}
+
+static def curDateTime() {
+    return new Date().format("yyyy-MM-dd HH:mm:ss")
+}
+
+static void checkConfigProperty(Object o, String p) {
+    if (o == null) {
+        throw new RuntimeException("config.gradle 配置文件缺少了 $p 属性")
+    }
+}
+
+ext.curDate = this.&curDate as MethodClosure
+ext.curDateTime = this.&curDateTime as MethodClosure
+ext.checkConfigProperty = this.&checkConfigProperty as MethodClosure

@@ -1,0 +1,95 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+}
+
+apply from: 'config.gradle'
+android {
+    namespace 'cn.veako.android.core'
+    compileSdk sdk.compileSdk
+
+    defaultConfig {
+        minSdk sdk.minSdk
+        targetSdk sdk.targetSdk
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            ext.enableCrashlytics = false
+            ext.alwaysUpdateBuildId = false
+            aaptOptions {
+                cruncherEnabled false
+            }
+        }
+        /**
+         * 建议提测用这个构建类型，并使用 BuildConfig.BUILD_TYPE 判断是否等于 beta
+         */
+        beta {
+            initWith release
+        }
+    }
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    apply from: 'dependencies.gradle'
+
+    /**
+     * 三个必须库
+     */
+    api core_deps.kotlinKTX
+    api core_deps.appcompat
+    api core_deps.material
+
+    // 内嵌的加载中库
+    checkConfigProperty(includeLib.loadSir, "loadSir")
+    if (includeLib.loadSir) {
+        api core_deps.loadSir
+    } else {
+        compileOnly core_deps.loadSir
+    }
+
+    //集合
+    api core_deps.collectionKTX
+
+    // 图片
+    checkConfigProperty(includeLib.glide, "glide")
+    if (includeLib.glide) {
+        api core_deps.glide
+    } else {
+        compileOnly core_deps.glide
+    }
+
+    // viewModelScope，会在 view 消失时取消协程
+    api core_deps.viewModelKTX
+    api core_deps.lifecycleRuntimeKTX
+
+    //gson
+    api core_deps.gson
+
+    // 网络
+    checkConfigProperty(includeLib.retrofit2, "retrofit2")
+    if (includeLib.retrofit2) {
+        api core_deps.retrofit2
+        api core_deps.retrofit2GsonConverter
+    } else {
+        compileOnly core_deps.retrofit2
+        compileOnly core_deps.retrofit2GsonConverter
+    }
+}
